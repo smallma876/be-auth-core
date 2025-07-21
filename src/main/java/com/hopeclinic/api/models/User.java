@@ -1,13 +1,13 @@
 package com.hopeclinic.api.models;
-import org.hibernate.annotations.CreationTimestamp;
-
+import java.util.List;
+import org.hibernate.validator.constraints.Length;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "users")
 public class User {
 
@@ -15,57 +15,30 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "document_number", length = 8, nullable = false, unique = true)
-    private String documentNumber;
+    @Column(unique = true, nullable = false, length = 15)
+    @NotBlank
+    @Length(min = 8, max = 15)
+    private String username;
 
-    @Column(name = "name", length = 100, nullable = false)
-    private String name;
-
-    @Column(name = "last_name", length = 100, nullable = false)
-    private String lastName;
-
-    @Column(name = "last_name2", length = 100, nullable = false)
-    private String lastName2;
-
-    @Column(name = "email", length = 100, nullable = false, unique = true)
-    private String email;
-
-    @Column(name = "phone", length = 20, nullable = true)
-    private String phone;
-
-    @Column(name = "mobile_phone", length = 20, nullable = true)
-    private String mobilePhone;
-
-    @Column(name = "password_hash", length = 255, nullable = false)
+    @NotBlank
+    @Length(min = 8)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "passsword_hash" , unique = true, length = 255, nullable = false)
     private String passwordHash;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private UserRole role;
 
     @Column(name = "profile_picture_url", length = 255, nullable = true)
     private String profilePictureUrl;
 
-    @Column(name = "created_at", nullable = true, updatable = false)
-    @CreationTimestamp
-    private java.sql.Timestamp createdAt;
-
-    @ManyToOne
-    @JoinColumn(name = "specialty_id", nullable = true)
-    private Specialty specialty;
-
-    @Column(name = "document_type", length = 50, nullable = true)
-    private String documentType;
-
-    @Column(name = "birthdate", nullable = true)
-    private java.sql.Date birthdate;
-
-    @Column(name = "gender", length = 20, nullable = true)
-    private String gender;
-
-    @Column(name = "marital_status", length = 20, nullable = true)
-    private String maritalStatus;
-
-    @Column(name = "domicile_street", length = 255, nullable = true)
-    private String domicileStreet;
+    @Transient
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private List<String> rolesName;
+    
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_role",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns =  @JoinColumn(name = "role_id"),
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role_id"})
+    )
+    private List<Role> roles;
 }
