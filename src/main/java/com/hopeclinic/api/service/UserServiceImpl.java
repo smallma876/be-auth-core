@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService{
         });
 
         user.setRoles(roles);
-        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return this.userRepository.saveAndFlush(user);
     }
 }
