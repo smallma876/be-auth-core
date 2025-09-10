@@ -21,6 +21,7 @@ public class SecurityConfig {
     @Autowired
     private AuthenticationConfiguration authenticationConfiguration;
 
+    @Bean
     AuthenticationManager authenticationManager() throws Exception{
         return authenticationConfiguration.getAuthenticationManager();
     }
@@ -32,9 +33,9 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.cors(withDefaults()).authorizeHttpRequests((auth) ->
-            auth.requestMatchers("/api/users").permitAll()
-            .anyRequest().authenticated())
-            .addFilter(new JwtAuthenticationFilter(authenticationManager()))
+            auth.requestMatchers("/api/users/register", "/api/auth/login").permitAll() 
+                .requestMatchers("/api/users/create").hasRole("ADMIN")
+                .anyRequest().authenticated())
             .csrf(config -> config.disable())
             .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .build();
