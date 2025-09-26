@@ -23,7 +23,7 @@ public class User {
     @NotBlank
     @Length(min = 8)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column(name = "password_hash" , unique = true, length = 255, nullable = false)
+    @Column(name = "password_hash" , length = 255, nullable = false)
     private String password;
 
     @Column(name = "profile_picture_url", length = 255, nullable = true)

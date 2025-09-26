@@ -1,10 +1,8 @@
 package com.hopeclinic.api.controllers;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
-
 import javax.crypto.SecretKey;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -46,18 +44,22 @@ public class AuthController {
             (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
 
         String username = user.getUsername();
-        Collection<? extends GrantedAuthority> roles = authentication.getAuthorities();
+
+        List<String> roleNames = authentication.getAuthorities()
+            .stream()
+            .map(GrantedAuthority::getAuthority)
+            .toList();
 
         Claims claims = Jwts.claims()
-            .add("authorities", roles)
+            .add("authorities", roleNames) 
             .add("username", username)
             .build();
 
         String jws = Jwts.builder()
             .subject(username)
             .claims(claims)
-            .expiration(new Date(System.currentTimeMillis() + 3600000))
-            .issuedAt(new Date(0))
+            .expiration(new Date(System.currentTimeMillis() + 3600000)) 
+            .issuedAt(new Date(System.currentTimeMillis()))
             .signWith(SECRET_KEY)
             .compact();
 
@@ -68,9 +70,10 @@ public class AuthController {
         cookie.setMaxAge(3600);
         response.addCookie(cookie);
 
-        Map<String, String> body = Map.of(
+        Map<String, Object> body = Map.of(
             "token", jws,
             "username", username,
+            "roles", roleNames,
             "message", String.format("Hola %s, has iniciado sesión con éxito", username)
         );
 
